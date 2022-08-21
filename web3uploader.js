@@ -16,7 +16,7 @@ http.createServer(function (req, res)
   if(req.url == '/')
   {
     res.writeHead(200, {'Content-Type': 'text/html'});
-    res.end('<html><head><script src="https://www.google.com/recaptcha/api.js"></script></head><body><form action="/upload" method="post" enctype="multipart/form-data"><input type="file" name="fileupload"><br><div class="g-recaptcha" data-sitekey="6Ley7YEhAAAAAKL3wJ-dL_K_s3Vgekgmi1bxbKjj"></div><br><input type="submit"></form></body></html>');
+    res.end('<html><head><script src="https://www.google.com/recaptcha/api.js"></script></head><body><h3>Upload to LiquidStorage:</h3><form action="/upload" method="post" enctype="multipart/form-data"><input type="file" name="fileupload">(20 MB file size limit)<br><div class="g-recaptcha" data-sitekey="6Ley7YEhAAAAAKL3wJ-dL_K_s3Vgekgmi1bxbKjj"></div><br><input type="submit"></form></body></html>');
   }
 
   if(req.url == '/upload')
@@ -42,7 +42,7 @@ http.createServer(function (req, res)
         return;
       }
       // Put your secret key here.
-      var secretKey = "INSERT_KEY_HERE";
+      var secretKey = "RECAPTCHA_SECRET_KEY";
       // req.connection.remoteAddress will provide IP address of connected user.
       var verificationUrl = "https://www.google.com/recaptcha/api/siteverify?secret=" + secretKey + "&response=" + fields['g-recaptcha-response'] + "&remoteip=" + req.connection.remoteAddress;
       // Hitting GET request to the URL, Google will respond with success or error scenario.
@@ -69,11 +69,11 @@ http.createServer(function (req, res)
         const service = await (await getClient()).service('storage', "zeosweb3apps");
         //const data = Buffer.from("a great success", "utf8");
         const data = fs.readFileSync(newpath);
-        const key = "INSERT_PRIVATE_KEY_HERE";
+        const key = "EOS_PRIVATE_KEY";
         const permission = "active";
         const options = {
           // if true, DAG leaves will contain raw file data and not be wrapped in a protobuf
-          rawLeaves: false
+          rawLeaves: true
         };
         const response = await service.upload_public_file(
             data,
