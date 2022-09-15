@@ -67,7 +67,6 @@ http.createServer(function (req, res)
       fs.rename(filepath, newpath, async function () {
         (async () => {
         const service = await (await getClient()).service('storage', "zeosweb3apps");
-        //const data = Buffer.from("a great success", "utf8");
         const data = fs.readFileSync(newpath);
         const key = "EOS_PRIVATE_KEY";
         const permission = "active";
@@ -83,7 +82,7 @@ http.createServer(function (req, res)
             options
         );
         console.log(`response uri: ${response.uri}`);
-        res.write('NodeJS File Upload Success!\n' + `response uri: \n${response.uri}`);
+        res.write('File Upload Success!\n' + `response uri: \n${response.uri}`);
         res.end();
         })().catch((e) => { console.log(e); res.write(e); res.end(); });
       });
