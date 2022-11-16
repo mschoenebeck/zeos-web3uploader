@@ -16,7 +16,25 @@ http.createServer(function (req, res)
   if(req.url == '/')
   {
     res.writeHead(200, {'Content-Type': 'text/html'});
-    res.end('<html><head><script src="https://www.google.com/recaptcha/api.js"></script></head><body><h3>Upload to LiquidStorage:</h3><form action="/upload" method="post" enctype="multipart/form-data"><input type="file" name="fileupload">(20 MB file size limit)<br><div class="g-recaptcha" data-sitekey="6Ley7YEhAAAAAKL3wJ-dL_K_s3Vgekgmi1bxbKjj"></div><br><input type="submit"></form></body></html>');
+    res.end('\
+    <html>\
+    <head>\
+      <script src="https://www.google.com/recaptcha/api.js"></script>\
+    </head>\
+    <body>\
+      <h3>Upload to LiquidStorage:</h3>\
+      <form action="/upload" method="post" enctype="multipart/form-data">\
+        <input type="file" name="fileupload">(20 MB file size limit)<br>\
+        <div class="g-recaptcha" data-sitekey="6Ley7YEhAAAAAKL3wJ-dL_K_s3Vgekgmi1bxbKjj"></div><br>\
+        <input type="submit">\
+      </form>\
+      <form action="/uploadstr" method="post" enctype="multipart/form-data">\
+        <input type="text" name="strupload">(100 KB file size limit)<br>\
+        <input type="submit">\
+      </form>\
+    </body>\
+    </html>'
+    );
   }
 
   if(req.url == '/upload')
@@ -60,7 +78,7 @@ http.createServer(function (req, res)
 
       // upload file
       let filepath = file.fileupload.filepath;
-      let newpath = '/tmp/web3/';
+      let newpath = '/tmp/';
       newpath += file.fileupload.originalFilename;
 
       // copy the uploaded file to a custom folder
@@ -86,6 +104,49 @@ http.createServer(function (req, res)
         res.end();
         })().catch((e) => { console.log(e); res.write(e); res.end(); });
       });
+    });
+  }
+  
+  if(req.url == '/uploadstr')
+  {
+    let options = {
+      // set file size limit (100 KB)
+      maxFileSize: 100 * 1024
+    };
+    let form = new formidable.IncomingForm(options);
+    form.on('error', (err) => {
+      console.log(err);
+    });
+    form.parse(req, function (error, fields, file)
+    {
+      if(fields['strupload'] === undefined || fields['strupload'] === '' || fields['strupload'] === null)
+      {
+        res.write('{"responseCode" : 1, "responseDesc" : "field strupload does not exist!"}');
+        res.end();
+      }
+      else
+      {
+          (async () => {
+            const service = await (await getClient()).service('storage', "zeosweb3apps");
+            const data = fields['strupload'];
+            const key = "EOS_PRIVATE_KEY";
+            const permission = "active";
+            const options = {
+              // if true, DAG leaves will contain raw file data and not be wrapped in a protobuf
+              rawLeaves: true
+            };
+            const response = await service.upload_public_file(
+                data,
+                key,
+                permission,
+                null,
+                options
+            );
+            console.log(`response uri: ${response.uri}`);
+            res.write('String Upload Success!\n' + `response uri: \n${response.uri}`);
+            res.end();
+          })().catch((e) => { console.log(e); res.write(e); res.end(); });
+      }
     });
   }
 
