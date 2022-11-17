@@ -128,7 +128,7 @@ http.createServer(function (req, res)
       {
           (async () => {
             const service = await (await getClient()).service('storage', "zeosweb3apps");
-            const data = fields['strupload'];
+            const data = Buffer.from(fields['strupload'], "utf-8");
             const key = "EOS_PRIVATE_KEY";
             const permission = "active";
             const options = {
